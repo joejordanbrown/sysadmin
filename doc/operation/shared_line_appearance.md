@@ -10,7 +10,7 @@ Legacy PBXes often had a feature called **Shared Line Appearance** for incoming 
 
 ## Simulating SLA
 
-Simulating most of SLA on a VoIP system is possible. Let's take a look at how this might be acheived.
+Simulating most of SLA on a Kazoo system is possible. Let's take a look at how this might be achieved.
 
 ### Incoming calls ring all devices
 
