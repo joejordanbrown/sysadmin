@@ -23,3 +23,29 @@ Kazoo allow updating a pre-defined `presence_id` to with BLF updates. You can se
 #### Placing on hold for others
 
 The closest way to put a call on hold so others could pick it up is using [`call parking`](https://docs.2600hz.com/dev/applications/callflow/doc/park/). Rather than using the hold button on the phone, the answering device can transfer the caller to a parking slot. Once parked, any device that knows the slot number can pick up the call.
+
+## Example SLA simulation
+
+Consider an office with 3 phones and a DID to be shared among them.
+
+### Status lights
+
+First, we need a `presence_id` to represent the shared line. Perhaps the last four digits of the DID would work? Let's use `3456` for our purposes.
+
+This `presence_id` will tie together the ring group and the parking. This value is what the BLF light on the phones will be set to `{presence_id}@account.realm` or `3456@account.realm` in this case.
+
+### Ring group
+
+The ring group actually needs a little help to make sure the presence updates are being set. The high level callflow looks like:
+
+[DID] -> [Manual Presence: ringing] -> [Ring Group] -> [
+
+
+
+```shell
+curl -X PUT -H "X-Auth-Token: $AUTH_TOKEN" \
+     -d "{\"data\": {\"flow\": { \"data\": { \"endpoints\": [{\"endpoint_type\": \"device\",\"id\": \"DEVICE_1_ID\"},{\"endpoint_type\": \"device\",\"id\": \"DEVICE_2_ID\"},{\"endpoint_type\": \"device\",\"id\": \"DEVICE_3_ID\"}]},\"module\": \"ring_group\"},\"name\": \"Main Number\",\"numbers\": [\"{DID}\"]}}" \
+     http://ip.add.re.ss:8000/v2/accounts/$ACCOUNT_ID/callflows | python -mjson.tool
+```
+
+Great! Now every call to `{DID}` will ring all three devices simultaneously.
