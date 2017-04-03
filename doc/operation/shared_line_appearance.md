@@ -26,26 +26,29 @@ The closest way to put a call on hold so others could pick it up is using [`call
 
 ## Example SLA simulation
 
-Consider an office with 3 phones and a DID to be shared among them.
+Consider the typical executive with an administrative assistant. The assistant's phone has a line key that will ring when the executive is called. The easiest way to do this is create two devices in Kazoo and assign them to the executive's Kazoo user.
 
-### Status lights
+### Create the executive
 
-First, we need a `presence_id` to represent the shared line. Perhaps the last four digits of the DID would work? Let's use `3456` for our purposes.
+1. [Create a user](https://docs.2600hz.com/dev/applications/crossbar/doc/users/) for the executive. Be sure to include `presence_id="EXT"` in the user object - this is what BLF lights will be tied to when setting up presence.
+2. [Create a device](https://docs.2600hz.com/dev/applications/crossbar/doc/devices/) for the executive.
+3. [Create the callflow](https://docs.2600hz.com/dev/applications/crossbar/doc/callflows/) using the [ring group](https://docs.2600hz.com/dev/applications/callflow/doc/ring_group/) action to ring both the executive's and assistant's phones. This will also cause a BLF update to `presence_id`@`account.realm` to update the assistant's BLF key.
 
-This `presence_id` will tie together the ring group and the parking. This value is what the BLF light on the phones will be set to `{presence_id}@account.realm` or `3456@account.realm` in this case.
+### Create the assistant
 
-### Ring group
+1. Create the user/device/callflow for the assistant (ringing the assistant's user in the callflow).
 
-The ring group actually needs a little help to make sure the presence updates are being set. The high level callflow looks like:
+### Create the call park/pickup callflow
 
-[DID] -> [Manual Presence: ringing] -> [Ring Group] -> [
+Create a callflow, `*4{presence_id}`, that will have the [`park`](https://docs.2600hz.com/dev/applications/callflow/doc/park/) callflow action. This will be used by the BLF key to simulate the hold/pickup of SLA. You should set the `action` to `auto` and the `slot` to `presence_id`.
 
+### Create the BLF key
 
+Create a BLF key configuration on the assistant's phone to:
 
-```shell
-curl -X PUT -H "X-Auth-Token: $AUTH_TOKEN" \
-     -d "{\"data\": {\"flow\": { \"data\": { \"endpoints\": [{\"endpoint_type\": \"device\",\"id\": \"DEVICE_1_ID\"},{\"endpoint_type\": \"device\",\"id\": \"DEVICE_2_ID\"},{\"endpoint_type\": \"device\",\"id\": \"DEVICE_3_ID\"}]},\"module\": \"ring_group\"},\"name\": \"Main Number\",\"numbers\": [\"{DID}\"]}}" \
-     http://ip.add.re.ss:8000/v2/accounts/$ACCOUNT_ID/callflows | python -mjson.tool
-```
+a. The "value" (or equivalent) will be `presence_id`
+b. The "extension" (or equivalent) will be `*4{presence_id}`
 
-Great! Now every call to `{DID}` will ring all three devices simultaneously.
+This will light up with the corresponding call.
+
+When the assistant puts the call on hold, the BLF can be used to pickup the call.
