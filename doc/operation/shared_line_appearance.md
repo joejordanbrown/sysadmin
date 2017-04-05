@@ -34,7 +34,7 @@ Consider the typical executive with an administrative assistant. The assistant's
    ```shell
    curl -X PUT \
        -H "X-Auth-Token: $AUTH_TOKEN" \
-       -d '{"data":{"name":"Assistant Device"}}' \
+       -d '{"data":{"name":"Assistant Device", "sip":{"username":"assistant", "password":"to_the_stars"}}}' \
        http://10.1.10.176:8000/v2/accounts/$ACCOUNT_ID/devices
    ```
    ```json
@@ -69,7 +69,7 @@ Consider the typical executive with an administrative assistant. The assistant's
    ```shell
    curl -X PUT \
        -H "X-Auth-Token: $AUTH_TOKEN" \
-       -d '{"data":{"name":"Executive Device", "owner_id":"{EXECUTIVE_USER_ID}"}}' \
+       -d '{"data":{"name":"Executive Device", "owner_id":"{EXECUTIVE_USER_ID}", "sip":{"username":"executive", "password":"high_roller"}}}' \
        http://{SERVER}:8000/v2/accounts/$ACCOUNT_ID/devices
    ```
    ```json
