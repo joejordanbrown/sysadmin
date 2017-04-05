@@ -28,15 +28,76 @@ The closest way to put a call on hold so others could pick it up is using [`call
 
 Consider the typical executive with an administrative assistant. The assistant's phone has a line key that will ring when the executive is called. The easiest way to do this is create two devices in Kazoo and assign them to the executive's Kazoo user.
 
+### Create the assistant
+
+1. Create the assitant's device
+   ```shell
+   curl -X PUT \
+       -H "X-Auth-Token: $AUTH_TOKEN" \
+       -d '{"data":{"name":"Assistant Device"}}' \
+       http://10.1.10.176:8000/v2/accounts/$ACCOUNT_ID/devices
+   ```
+   ```json
+   {
+       "data":{
+           "id":"{ASSISTANT_DEVICE_ID}"
+           ,...
+       }
+       ,...
+   }
+   ```
+
 ### Create the executive
 
 1. [Create a user](https://docs.2600hz.com/dev/applications/crossbar/doc/users/) for the executive. Be sure to include `presence_id="EXT"` in the user object - this is what BLF lights will be tied to when setting up presence.
+   ```shell
+   curl -X PUT \
+       -H "X-Auth-Token: {AUTH_TOKEN}" \
+       -d '{"data":{"first_name":"Exec", "last_name":"Utive", "presence_id":"1000"}}'
+   http://{SERVER}:8000/v2/accounts/{ACCOUNT_ID}/users
+   ```
+   ```json
+   {
+       "data":{
+           "id":"{EXECUTIVE_USER_ID}"
+           ,...
+       }
+       ,...
+   }
+   ```
 2. [Create a device](https://docs.2600hz.com/dev/applications/crossbar/doc/devices/) for the executive.
+   ```shell
+   curl -X PUT \
+       -H "X-Auth-Token: $AUTH_TOKEN" \
+       -d '{"data":{"name":"Executive Device", "owner_id":"{EXECUTIVE_USER_ID}"}}' \
+       http://{SERVER}:8000/v2/accounts/$ACCOUNT_ID/devices
+   ```
+   ```json
+   {
+       "data":{
+           "id":"{EXECUTIVE_DEVICE_ID}"
+           ,...
+       }
+       ,...
+   }
+   ```
 3. [Create the callflow](https://docs.2600hz.com/dev/applications/crossbar/doc/callflows/) using the [ring group](https://docs.2600hz.com/dev/applications/callflow/doc/ring_group/) action to ring both the executive's and assistant's phones. This will also cause a BLF update to `presence_id`@`account.realm` to update the assistant's BLF key.
+   ```shell
+   curl -X PUT \
+       -H "X-Auth-Token: $AUTH_TOKEN" \
+       -d '{"data":{"numbers":["1000"], "flow":{"module":"ring_group","data":{"endpoints":[{"id":"{EXECUTIVE_USER_ID}", "endpoint_type":"user"}, {"id":"{ASSISTANT_DEVICE_ID}", "endpoint_type":"device"}]}}}}' \
+        http://10.1.10.176:8000/v2/accounts/$ACCOUNT_ID/callflows
+   ```
+   ```json
+   {
+       "data":{
+           "id":"{EXECUTIVE_CALLFLOW_ID}"
+           ,...
+       }
+   }
+   ```
 
-### Create the assistant
-
-1. Create the user/device/callflow for the assistant (ringing the assistant's user in the callflow).
+Now calls to extension 1000 should ring both the executive and the assistant devices.
 
 ### Create the call park/pickup callflow
 
