@@ -117,6 +117,8 @@ Create a callflow, `*4{presence_id}`, that will have the [`park`](https://docs.2
    }
    ```
 
+`auto` will retrieve a call if one is parked or park the call if the slot is empty.
+
 ### Create the BLF key
 
 Create a BLF key configuration on the assistant's phone to:
