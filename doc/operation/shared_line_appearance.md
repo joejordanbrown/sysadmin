@@ -35,7 +35,7 @@ Consider the typical executive with an administrative assistant. The assistant's
    curl -X PUT \
        -H "X-Auth-Token: $AUTH_TOKEN" \
        -d '{"data":{"name":"Assistant Device", "sip":{"username":"assistant", "password":"to_the_stars"}}}' \
-       http://10.1.10.176:8000/v2/accounts/$ACCOUNT_ID/devices
+       http://{SERVER}:8000/v2/accounts/$ACCOUNT_ID/devices
    ```
    ```json
    {
@@ -86,7 +86,7 @@ Consider the typical executive with an administrative assistant. The assistant's
    curl -X PUT \
        -H "X-Auth-Token: $AUTH_TOKEN" \
        -d '{"data":{"numbers":["1000"], "flow":{"module":"ring_group","data":{"endpoints":[{"id":"{EXECUTIVE_USER_ID}", "endpoint_type":"user"}, {"id":"{ASSISTANT_DEVICE_ID}", "endpoint_type":"device"}]}}}}' \
-        http://10.1.10.176:8000/v2/accounts/$ACCOUNT_ID/callflows
+        http://{SERVER}:8000/v2/accounts/$ACCOUNT_ID/callflows
    ```
    ```json
    {
@@ -102,6 +102,20 @@ Now calls to extension 1000 should ring both the executive and the assistant dev
 ### Create the call park/pickup callflow
 
 Create a callflow, `*4{presence_id}`, that will have the [`park`](https://docs.2600hz.com/dev/applications/callflow/doc/park/) callflow action. This will be used by the BLF key to simulate the hold/pickup of SLA. You should set the `action` to `auto` and the `slot` to `presence_id`.
+    ```shell
+   curl -X PUT \
+       -H "X-Auth-Token: $AUTH_TOKEN" \
+       -d '{"data":{"patterns":["*4(\\d+)"], "flow":{"module":"park","data":{"action":"auto"}}}}' \
+        http://{SERVER}:8000/v2/accounts/$ACCOUNT_ID/callflows
+   ```
+   ```json
+   {
+       "data":{
+           "id":"{PARK_CALLFLOW_ID}"
+           ,...
+       }
+   }
+   ```
 
 ### Create the BLF key
 
